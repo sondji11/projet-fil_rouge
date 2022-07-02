@@ -49,6 +49,8 @@ class Burger extends Produits
     #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'burgers')]
     private $gestionnaire;
 
+    
+
     public function getMenu(): ?Menu
     {
         return $this->menu;
@@ -72,4 +74,16 @@ class Burger extends Produits
 
         return $this;
     }
+
+    // public function getCatalogue(): ?Catalogue
+    // {
+    //     return $this->catalogue;
+    // }
+
+    // public function setCatalogue(?Catalogue $catalogue): self
+    // {
+    //     $this->catalogue = $catalogue;
+
+    //     return $this;
+    // }
 }

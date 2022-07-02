@@ -54,6 +54,8 @@ class Menu extends Produits
 
    
 
+   
+
     public function __construct()
     {
         $this->portionfrites = new ArrayCollection();
@@ -140,6 +142,18 @@ class Menu extends Produits
 
         return $this;
     }
+
+    // public function getCatalogue(): ?Catalogue
+    // {
+    //     return $this->catalogue;
+    // }
+
+    // public function setCatalogue(?Catalogue $catalogue): self
+    // {
+    //     $this->catalogue = $catalogue;
+
+    //     return $this;
+    // }
 
    
     

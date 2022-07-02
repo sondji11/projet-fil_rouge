@@ -40,36 +40,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
                     ]
             )]
     
-    
-//     collectionOperations:[
-//         "get"=>[
-//         'method' => 'get',
-//         'status' => Response::HTTP_OK,
-//         'normalization_context' => ['groups' => ['produits:read:simple']],
-//         ],
-//         "post"=>[
-//         'method' => 'post',
-//         'status' => Response::HTTP_OK,
-//         'denormalization_context' => ['groups' => ['djibril']]
-
-//         ]
-//         ],
-//         itemOperations:[
-//             "get"=>[
-//             'method' => 'get',
-//             "path"=>"/bugers/{id}" ,
-//             'requirements' => ['id' => '\d+'],
-//             'normalization_context' => ['groups' => ['all']],
-//             ],
-//             "put"=>[
-//                 'method' => 'put',
-//                 "path"=>"/bugers/{id}" ,
-//                 'requirements' => ['id' => '\d+'],
-//                 'normalization_context' => ['groups' => ['all']],
-//                 ],
-//         ]
-// )]
-
 #[ORM\InheritanceType("JOINED")]
 #[ORM\DiscriminatorColumn(name: "discr", type: "string")]
 #[ORM\DiscriminatorMap(["produits"=>"Produits","menu"=>"Menu","burger"=>"Burger","boisson"=>"Boisson","portionfrite"=>"Portionfrite"])]
