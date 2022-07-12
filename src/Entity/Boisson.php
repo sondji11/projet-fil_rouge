@@ -15,15 +15,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
         "get"=>
         [
             "method"=>"get",
-            "normalization_context" => ['groups' => ['boisson:write']]
+            "normalization_context" => ['groups' => ['boisson:read']]
 
 
         ],
         "post"=>
         [
             "method"=>"post",
-            "denormalization_context" => ['groups' => ['boisson:write']],
-            "normalization_context" => ['groups' => ['boisson:write']]
+            "denormalization_context" => ['groups' => ['collection:post_boissons:read']],
+            "normalization_context" => ['groups' => ['boisson:read']]
 
         ]
     ],
@@ -32,14 +32,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
             'method' => 'get',
             "path"=>"/boissons/{id}" ,
             'requirements' => ['id' => '\d+'],
-            'normalization_context' => ['groups' => ['All']],
+            'normalization_context' => ['groups' => ['item:get_boissons']],
             ],
 
             "put"=>[
                 'method' => 'put',
                 "path"=>"/boissons/{id}" ,
                 'requirements' => ['id' => '\d+'],
-                'normalization_context' => ['groups' => ['All']],
+                'normalization_context' => ['groups' => ['item:put_boissons:read']],
                 ],
 
 
@@ -49,16 +49,20 @@ use Symfony\Component\Serializer\Annotation\Groups;
 )]
 class Boisson extends Produits
 {
+    #[ORM\ManyToMany(targetEntity: Taille::class, mappedBy: 'boissons')]
+    // #[Groups('tailles:write:simple','tailles:read:simple','boisson:write')]
+    private $tailles;
+
     // #[ORM\Id]
     // #[ORM\GeneratedValue]
     // #[ORM\Column(type: 'integer')]
     // private $id;
-    #[ORM\ManyToMany(targetEntity: Taille::class, inversedBy: 'boissons')]
-    private $boissons;
+   
 
     public function __construct()
     {
         $this->boissons = new ArrayCollection();
+        $this->tailles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -69,24 +73,31 @@ class Boisson extends Produits
     /**
      * @return Collection<int, Taille>
      */
-    public function getBoissons(): Collection
+    public function getTailles(): Collection
     {
-        return $this->boissons;
+        return $this->tailles;
     }
 
-    public function addBoisson(Taille $boisson): self
+    public function addTaille(Taille $taille): self
     {
-        if (!$this->boissons->contains($boisson)) {
-            $this->boissons[] = $boisson;
+        if (!$this->tailles->contains($taille)) {
+            $this->tailles[] = $taille;
+            $taille->addBoisson($this);
         }
 
         return $this;
     }
 
-    public function removeBoisson(Taille $boisson): self
+    public function removeTaille(Taille $taille): self
     {
-        $this->boissons->removeElement($boisson);
+        if ($this->tailles->removeElement($taille)) {
+            $taille->removeBoisson($this);
+        }
 
         return $this;
     }
+
+   
+
+   
 }

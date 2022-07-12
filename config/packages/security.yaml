@@ -34,7 +34,14 @@ security:
             # - { path: ^/admin, roles: ROLE_ADMIN }
             # - { path: ^/profile, roles: ROLE_USER }
             - { path: ^/api/email, roles: PUBLIC_ACCESS }
-            - { path: ^/api/burger, roles: PUBLIC_ACCESS }
+            - { path: ^/api/catalogue , roles: PUBLIC_ACCESS }
+            - { path: ^/api/burger, roles: PUBLIC_ACCESS, methods: ['GET'] }
+            - { path: ^/api/complement, roles: PUBLIC_ACCESS }
+            - { path: ^/api/clients , roles: PUBLIC_ACCESS }
+            - { path: ^/api/menus  , roles: PUBLIC_ACCESS }
+
+
+
 
             - { path: ^/api$ , roles: PUBLIC_ACCESS }
             - { path: ^/api,  roles: IS_AUTHENTICATED_FULLY }

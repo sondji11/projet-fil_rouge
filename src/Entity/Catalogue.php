@@ -17,17 +17,18 @@ use Symfony\Component\Serializer\Annotation\Groups;
         'status' => Response::HTTP_OK,
         'path'=>'catalogue/',
         // 'denormalization_context' => ['groups' => ['user:write']],
-        'normalization_context' => ['groups' => ['catologue']]
+        'normalization_context' => ['groups' => ['catalogue']]
         ]
     ],
-        itemOperations:[]
+        itemOperations:[],
+        attributes: ["pagination_items_per_page" => 5]
 )]
 
 class Catalogue
 {
-    #[Groups(["catologue"])]
+    #[Groups(["catalogue"])]
     private $burgers;
-    #[Groups(["catologue"])]
+    #[Groups(["catalogue"])]
     private $menus;
 
     public function __construct()

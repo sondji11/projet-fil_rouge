@@ -39,15 +39,21 @@ class DataPersister implements DataPersisterInterface
      */
     public function persist($data, array $context = [])
     {
+    
+
         if ($data->getPassword()) {
 
             $data->setPassword($this->_passwordEncoder->hashPassword($data, $data->getPassword()));
 
-                $data->eraseCredentials();
+               // $data->eraseCredentials();
 
         }
+        // dd($data);
+       
 
         $this->_entityManager->persist($data);
+
+
         $this->_entityManager->flush();
         // $this->mailerService->SendEmail($data);
     }

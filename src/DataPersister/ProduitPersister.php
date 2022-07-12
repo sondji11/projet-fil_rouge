@@ -10,20 +10,26 @@ use App\Services\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Core\DataPersister\DataPersisterInterface;
 use App\Entity\Menu;
+use App\Services\CalculPrixMenuService;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  *
  */
 class ProduitPersister implements DataPersisterInterface
-{
-    private $_entityManager;
+    {
+   
+        private $_entityManager;
+        private $menucalcul;
+    
 
 
-    public function __construct(EntityManagerInterface $entityManager) {
-        $this->_entityManager = $entityManager;
+         public function __construct(EntityManagerInterface $entityManager,CalculPrixMenuService $menucalcul) {
+                $this->_entityManager = $entityManager;
+                $this->menucalcul = $menucalcul;
+
        
-    }
+         }
 
     /**
      * {@inheritdoc}
@@ -37,32 +43,24 @@ class ProduitPersister implements DataPersisterInterface
      * @param Produits $data
      */
     public function persist($data, array $context = [])
-    {
-        if ($data instanceof Menu) {
-            $prix=0;
-            foreach($data->getBurgers() as $burger){
-                $prix += $burger->getPrix();
-            };
-            foreach($data->getPortionfrites() as $portionfrite){
-                $prix+=$portionfrite->getPrix();
-            };
-            foreach($data->getTailles() as $taille){
-                $prix+=$taille->getPrix();
-            };
-            $data->setPrix($prix);
+        {
+            if($data instanceof Menu){
 
-
-            $frites=$data->getPortionfrites();
-            $tailles=$data->getTailles();
-            dd(count($tailles));
+                $data->setPrix($this->menucalcul->calculprix($data));
+            }
+            if ($data instanceof Produits ) 
+            {
+                if($data->getFileImage())
+                {
+                    $data->setImage(\file_get_contents($data->getFileImage()));
+                }
+            }
+            $this->_entityManager->persist($data);
+            $this->_entityManager->flush();
+  
         }
         
-
-        $this->_entityManager->persist($data);
-
-        $this->_entityManager->flush();
-    }
-
+    
     /**
      * {@inheritdoc}
      */

@@ -13,27 +13,27 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource]
 class Gestionnaire extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    #[Groups(["all"])]
-
-    private $id;
-    #[Groups(["all"])]
+   
+   
+    #[Groups(["all",])]
 
     #[ORM\OneToMany(mappedBy: 'gestionnaire', targetEntity: Burger::class)]
     private $burgers;
 
+    #[ORM\OneToMany(mappedBy: 'gestionnaire', targetEntity: Commande::class)]
+    private $commandes;
+
+    #[ORM\OneToMany(mappedBy: 'gestionnaire', targetEntity: Produits::class)]
+    private $produits;
+
     public function __construct()
     {
         $this->burgers = new ArrayCollection();
+        $this->setRoles(["ROLE_GESTIONNAIRE"]);
+        $this->commandes = new ArrayCollection();
+        $this->produits = new ArrayCollection(); 
     }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
+   
     /**
      * @return Collection<int, Burger>
      */
@@ -58,6 +58,66 @@ class Gestionnaire extends User
             // set the owning side to null (unless already changed)
             if ($burger->getGestionnaire() === $this) {
                 $burger->setGestionnaire(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commande>
+     */
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
+
+    public function addCommande(Commande $commande): self
+    {
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes[] = $commande;
+            $commande->setGestionnaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommande(Commande $commande): self
+    {
+        if ($this->commandes->removeElement($commande)) {
+            // set the owning side to null (unless already changed)
+            if ($commande->getGestionnaire() === $this) {
+                $commande->setGestionnaire(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Produits>
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
+    }
+
+    public function addProduit(Produits $produit): self
+    {
+        if (!$this->produits->contains($produit)) {
+            $this->produits[] = $produit;
+            $produit->setGestionnaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduit(Produits $produit): self
+    {
+        if ($this->produits->removeElement($produit)) {
+            // set the owning side to null (unless already changed)
+            if ($produit->getGestionnaire() === $this) {
+                $produit->setGestionnaire(null);
             }
         }
 

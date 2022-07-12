@@ -10,35 +10,11 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: ProduitsRepository::class)]
 
-#[ApiResource (
-    collectionOperations:[
-        "get"=>[
-        'method' => 'get',
-        'status' => Response::HTTP_OK,
-        'normalization_context' => ['groups' => ['burgers:read:simple']],
-        ],
-        "post"=>[
-        'method' => 'post',
-        'denormalization_context' => ['groups' => ['write']],
-        ]
-        ],
-        itemOperations:[
-                        // "get"=>[
-                        // 'method' => 'get',
-                        // "path"=>"/bugers/{id}" ,
-                        // 'requirements' => ['id' => '\d+'],
-                        // 'normalization_context' => ['groups' => ['all']],
-                        // ],
-                        "put"=>[
-                            "security" => "is_granted('ROLE_GESTIONNAIRE')",
-                            "security_message"=>"Vous n'avez pas access à cette Ressource"
-                           
-                            ],
-                    ]
-            )]
+#[ApiResource ( attributes: ["pagination_items_per_page" => 5])]
     
 #[ORM\InheritanceType("JOINED")]
 #[ORM\DiscriminatorColumn(name: "discr", type: "string")]
@@ -49,29 +25,43 @@ class Produits
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    // #[Groups(["djibril"])]
-    #[Groups(["burgers:read:simple","menu:write" ,"write",'menu:frite','boisson:write','menu:read:simple','All'])]
 
+
+    #[Groups([
+    "menu:write" ,'menu:frite',
+    "menu:read:simple","collection:post_burger:read"])]
     protected $id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    // #[Groups(["djibril"])]
-    #[Groups(['All',"burgers:read:simple",'menu:write','write','boisson:write','menu:read:simple','menu:frite'])]
-
+    #[Groups(['item:get_boissons',"burgers:read:simple","collection:post_burger:read",'collection:post_boissons:read','menu:read:simple','menu:frite',"tailles:write:simple","menu:write"])]
     protected $nom;
-
-    #[ORM\Column(type:'string', nullable: true)]
-    #[Groups(['All',"burgers:read:simple",'menu:write' ,'write','menu:read:simple','menu:frite','boisson:write'])]
-
-
+    
+    #[ORM\Column(type:'blob', nullable: true)]
     protected $image;
 
-    #[Groups(["burgers:read:simple", 'menu:write','write','menu:read:simple','menu:frite'])]
+    #[Groups(["burgers:read:simple", "collection:post_burger:read",'menu:frite','item:get_boissons',"tailles:write:simple"])]
     #[ORM\Column(type: 'float', nullable: true)]
     protected $prix;
-    #[Groups(["burgers:read:simple",'menu:write','write'])]
+    #[Groups(["burgers:read:simple","collection:post_burger:read"])]
     #[ORM\Column(type: 'boolean', nullable: true)]
     protected $etat;
+
+    #[SerializedName("image")]
+    #[Groups(["collection:post_burger:read","burgers:read:simple",'item:get_boissons','menu:frite','collection:post_boissons:read',"menu:write"])]
+
+    private string $fileImage;
+
+    #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'produits')]
+    #[Groups([
+        "collection:post_burger:read","burgers:read:simple",
+        "item:put_burger:read", "item:get_burger",
+        "collection:post_frites:read",
+        "item:put_frites:read", "item:get_frites",
+        "collection:post_boissons:read","boisson:read",
+        "item:put_boissons:read", "item:get_boissons",
+        "post:read:menu"
+    ])]
+    private $gestionnaire;
 
     public function getId(): ?int
     {
@@ -90,17 +80,7 @@ class Produits
         return $this;
     }
 
-    public function getImage(): ?string
-    {
-        return $this->image;
-    }
-
-    public function setImage(string $image): self
-    {
-        $this->image = $image;
-
-        return $this;
-    }
+    
 
     public function getPrix(): ?float
     {
@@ -122,6 +102,50 @@ class Produits
     public function setEtat(?bool $etat): self
     {
         $this->etat = $etat;
+
+        return $this;
+    }
+
+    public function getFileImage(): ?string
+    {
+        return $this->fileImage;
+    }
+
+    public function setFileImage(?string $fileImage): self
+    {
+        $this->fileImage = $fileImage;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of image
+     */ 
+    public function getImage()
+    {
+        return is_resource($this->image) ? utf8_encode(base64_encode(stream_get_contents($this->image))):$this->image;
+    }
+
+    /**
+     * Set the value of image
+     *
+     * @return  self
+     */ 
+    public function setImage($image)
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    public function getGestionnaire(): ?Gestionnaire
+    {
+        return $this->gestionnaire;
+    }
+
+    public function setGestionnaire(?Gestionnaire $gestionnaire): self
+    {
+        $this->gestionnaire = $gestionnaire;
 
         return $this;
     }

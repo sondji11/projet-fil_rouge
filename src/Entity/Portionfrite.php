@@ -23,11 +23,28 @@ use Doctrine\ORM\Mapping as ORM;
         "post"=>[
 
             'method' => 'post',
+            "security" => "is_granted('ROLE_GESTIONNAIRE')",
+            "security_message" => "Vous n'êtes pas autorisé à utiliser ce service",
 
-            'denormalization_context' => ['groups' => ['menu:frite']]
+            'denormalization_context' => ['groups' => ['collection:post_frites:read']]
         ]
     ],
-    itemOperations:["get","put"]
+    itemOperations:[
+        "get"=>[
+            'method'=>"get",
+            "normalization_context" => ["groups" => ["item:get_frites:read"]],
+            "denormalization_context" => ["groups" => ["item:get_frites:write"]]
+
+
+    ]
+    ,"put"=>[
+        'method'=>'put',
+        "security" => "is_granted('ROLE_GESTIONNAIRE')",
+        "security_message" => "Vous n'êtes pas autorisé à utiliser ce service",
+        "normalization_context" => ["groups" => ["item:put_frites:read"]],
+        "denormalization_context" => ["groups" => ["item:put_frites:write"]]
+    
+    ]]
 
 
 
@@ -35,12 +52,15 @@ use Doctrine\ORM\Mapping as ORM;
 )]
 class Portionfrite extends Produits
 {
-    #[ORM\ManyToMany(targetEntity: Menu::class, mappedBy: 'portionfrites')]
-    private $menus;
+   
+
+    #[ORM\OneToMany(mappedBy: 'portionfrite', targetEntity: MenuPortion::class)]
+    private $menuPortions;
 
     public function __construct()
     {
-        $this->menus = new ArrayCollection();
+       
+        $this->menuPortions = new ArrayCollection();
     }
 
     // #[ORM\Id]
@@ -55,28 +75,32 @@ class Portionfrite extends Produits
     //     return $this->id;
     // }
 
+   
     /**
-     * @return Collection<int, Menu>
+     * @return Collection<int, MenuPortion>
      */
-    public function getMenus(): Collection
+    public function getMenuPortions(): Collection
     {
-        return $this->menus;
+        return $this->menuPortions;
     }
 
-    public function addMenu(Menu $menu): self
+    public function addMenuPortion(MenuPortion $menuPortion): self
     {
-        if (!$this->menus->contains($menu)) {
-            $this->menus[] = $menu;
-            $menu->addPortionfrite($this);
+        if (!$this->menuPortions->contains($menuPortion)) {
+            $this->menuPortions[] = $menuPortion;
+            $menuPortion->setPortionfrite($this);
         }
 
         return $this;
     }
 
-    public function removeMenu(Menu $menu): self
+    public function removeMenuPortion(MenuPortion $menuPortion): self
     {
-        if ($this->menus->removeElement($menu)) {
-            $menu->removePortionfrite($this);
+        if ($this->menuPortions->removeElement($menuPortion)) {
+            // set the owning side to null (unless already changed)
+            if ($menuPortion->getPortionfrite() === $this) {
+                $menuPortion->setPortionfrite(null);
+            }
         }
 
         return $this;

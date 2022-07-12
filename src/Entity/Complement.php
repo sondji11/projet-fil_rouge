@@ -7,7 +7,10 @@ use App\Repository\ComplementRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 // #[ORM\Entity(repositoryClass: ComplementRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    attributes: ["pagination_items_per_page" => 5]
+    
+)]
 class Complement 
 {
     

@@ -20,9 +20,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
         "post"=>
         [
-
             'method' => 'post',
-            'denormalization_context' => ['groups' => ['tailles:read:simple']]
+
+            'denormalization_context' => ['groups' => ['menu:write']],
+
         ]
     ],
     itemOperations:[
@@ -34,25 +35,29 @@ class Taille
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(["tailles:read:simple"])]
+    #[Groups(["tailles:read:simple","menu:write"])]
     private $id;
-    #[Groups(["tailles:read:simple"])]
+    #[Groups(["tailles:read:simple","menu:write"])]
     #[ORM\Column(type: 'float', nullable: true)]
     private $prix;
-    #[Groups(["tailles:read:simple"])]
+    #[Groups(["tailles:read:simple","menu:write"])]
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $libelle;
-
-    #[ORM\ManyToMany(targetEntity: Boisson::class, mappedBy: 'boissons')]
+    // #[Groups(["tailles:read:simple"])]
+   
+    #[Groups(["tailles:read:simple",])]
+    #[ORM\ManyToMany(targetEntity: Boisson::class, inversedBy: 'tailles')]
     private $boissons;
 
-    #[ORM\ManyToMany(targetEntity: Menu::class, mappedBy: 'tailles')]
-    private $menus;
+    #[ORM\OneToMany(mappedBy: 'taille', targetEntity: MenuTaille::class)]
+    private $menuTailles;
 
     public function __construct()
     {
+        
+        
         $this->boissons = new ArrayCollection();
-        $this->menus = new ArrayCollection();
+        $this->menuTailles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -84,6 +89,7 @@ class Taille
         return $this;
     }
 
+
     /**
      * @return Collection<int, Boisson>
      */
@@ -96,7 +102,6 @@ class Taille
     {
         if (!$this->boissons->contains($boisson)) {
             $this->boissons[] = $boisson;
-            $boisson->addBoisson($this);
         }
 
         return $this;
@@ -104,35 +109,36 @@ class Taille
 
     public function removeBoisson(Boisson $boisson): self
     {
-        if ($this->boissons->removeElement($boisson)) {
-            $boisson->removeBoisson($this);
-        }
+        $this->boissons->removeElement($boisson);
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Menu>
+     * @return Collection<int, MenuTaille>
      */
-    public function getMenus(): Collection
+    public function getMenuTailles(): Collection
     {
-        return $this->menus;
+        return $this->menuTailles;
     }
 
-    public function addMenu(Menu $menu): self
+    public function addMenuTaille(MenuTaille $menuTaille): self
     {
-        if (!$this->menus->contains($menu)) {
-            $this->menus[] = $menu;
-            $menu->addTaille($this);
+        if (!$this->menuTailles->contains($menuTaille)) {
+            $this->menuTailles[] = $menuTaille;
+            $menuTaille->setTaille($this);
         }
 
         return $this;
     }
 
-    public function removeMenu(Menu $menu): self
+    public function removeMenuTaille(MenuTaille $menuTaille): self
     {
-        if ($this->menus->removeElement($menu)) {
-            $menu->removeTaille($this);
+        if ($this->menuTailles->removeElement($menuTaille)) {
+            // set the owning side to null (unless already changed)
+            if ($menuTaille->getTaille() === $this) {
+                $menuTaille->setTaille(null);
+            }
         }
 
         return $this;
